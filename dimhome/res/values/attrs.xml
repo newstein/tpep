@@ -135,6 +135,21 @@
         <attr name="title" format="reference" />
         <attr name="uri" format="string" />
     </declare-styleable>
+  <!-- XML attributes used by default_allapps.xml -->
+    <declare-styleable name="AllAppsFavorite">
+        <attr name="Aindex" format="integer" />
+        <attr name="AclassName" format="string" />
+        <attr name="ApackageName" format="string" />
+        <attr name="Ahascode" format="string" />
+
+    </declare-styleable>
+    <declare-styleable name="TopAppsFavorite">
+        <attr name="Tindex" format="integer" />
+        <attr name="TclassName" format="string" />
+        <attr name="TpackageName" format="string" />
+        <attr name="Thascode" format="string" />
+
+    </declare-styleable>   
 
     <declare-styleable name="NumberPickerPreference">
         <attr name="max" format="integer" />

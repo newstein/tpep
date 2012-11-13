@@ -69,6 +69,13 @@ public class LauncherProvider extends ContentProvider {
     static final String TABLE_FAVORITES = "favorites";
     static final String PARAMETER_NOTIFY = "notify";
 
+    static final String TABLE_ALLAPPSFAVORITES = "allappsfavorites";
+    static final String TABLE_TOPAPPSFAVORITES = "topappsfavorites";
+
+
+
+
+
     /**
      * {@link Uri} triggered at any registered {@link android.database.ContentObserver} when
      * {@link AppWidgetHost#deleteHost()} is called during database creation.
@@ -202,6 +209,14 @@ public class LauncherProvider extends ContentProvider {
         private static final String TAG_APPWIDGET = "appwidget";
         private static final String TAG_SHORTCUT = "shortcut";
         private static final String TAG_FOLDER = "folder";
+		
+        private static final String TAG_ALLAPPSFAVORITES = "allappsfavorites";
+        private static final String TAG_ALLAPPSFAVORITE = "allappsfavorite";
+
+        private static final String TAG_TOPAPPSFAVORITES = "topappsfavorites";
+        private static final String TAG_TOPAPPSFAVORITE = "topappsfavorite";
+
+
 
         private final Context mContext;
         private final AppWidgetHost mAppWidgetHost;
@@ -257,16 +272,51 @@ public class LauncherProvider extends ContentProvider {
                     "displayMode INTEGER" +
                     ");");
 
+
+            db.execSQL("CREATE TABLE allappsfavorites (" +
+                    "_id INTEGER PRIMARY KEY," +
+                    "aindex INTEGER," +
+                    "apname TEXT," +
+                    "acname TEXT," +
+                    "ahascode TEXT" +
+                    ");");
+
+
+            db.execSQL("CREATE TABLE topappsfavorites (" +
+                    "_id INTEGER PRIMARY KEY," +
+                    "tindex INTEGER," +
+                    "tpname TEXT," +
+                    "tcname TEXT," +
+                    "thascode TEXT" +
+                    ");");
+
+
+
             // Database was just created, so wipe any previous widgets
             if (mAppWidgetHost != null) {
                 mAppWidgetHost.deleteHost();
                 sendAppWidgetResetNotify();
             }
-
+			
             if (!convertDatabase(db)) {
                 // Populate favorites table with initial favorites
                 loadFavorites(db, R.xml.default_workspace);
             }
+///			
+            if (!convertAllAppsDatabase(db)) {
+
+                loadAllAppsFavorites(db, R.xml.default_allapps);
+
+				
+            }
+            if (!convertTopAppsDatabase(db)) {
+
+				loadTopAppsFavorites(db, R.xml.default_topapps);
+			
+            }
+
+///
+			
         }
 
         private boolean convertDatabase(SQLiteDatabase db) {
@@ -362,6 +412,149 @@ public class LauncherProvider extends ContentProvider {
 
             return total;
         }
+
+        private boolean convertAllAppsDatabase(SQLiteDatabase db) {
+            if (LOGD) Log.d(TAG, "converting database from an older format, but not onUpgrade");
+            boolean converted = false;
+
+            final Uri uri = Uri.parse("content://" + Settings.AUTHORITY +
+                    "/old_favorites?notify=true");
+            final ContentResolver resolver = mContext.getContentResolver();
+            Cursor cursor = null;
+
+            try {
+                cursor = resolver.query(uri, null, null, null, null);
+            } catch (Exception e) {
+                // Ignore
+            }
+
+            // We already have a favorites database in the old provider
+            if (cursor != null && cursor.getCount() > 0) {
+                try {
+                    converted = copyAllAppsFromCursor(db, cursor) > 0;
+                } finally {
+                    cursor.close();
+                }
+
+                if (converted) {
+                    resolver.delete(uri, null, null);
+                }
+            }
+            
+
+
+            return converted;
+        }
+
+        private int copyAllAppsFromCursor(SQLiteDatabase db, Cursor c) {
+            final int idIndex = c.getColumnIndexOrThrow(LauncherSettings.AllAppsFavorites._ID);
+            final int Index = c.getColumnIndexOrThrow(LauncherSettings.AllAppsFavorites.AIndex);
+            final int PackageName = c.getColumnIndexOrThrow(LauncherSettings.AllAppsFavorites.APackageName);
+            final int ClassName = c.getColumnIndexOrThrow(LauncherSettings.AllAppsFavorites.AClassName);
+            final int Hascode = c.getColumnIndexOrThrow(LauncherSettings.AllAppsFavorites.AHascode);
+
+            ContentValues[] rows = new ContentValues[c.getCount()];
+            int i = 0;
+            while (c.moveToNext()) {
+                ContentValues values = new ContentValues(c.getColumnCount());
+                values.put(LauncherSettings.AllAppsFavorites._ID, c.getLong(idIndex));
+                values.put(LauncherSettings.AllAppsFavorites.AIndex, c.getString(Index));
+                values.put(LauncherSettings.AllAppsFavorites.APackageName, c.getString(PackageName));
+                values.put(LauncherSettings.AllAppsFavorites.AClassName, c.getString(ClassName));
+                values.put(LauncherSettings.AllAppsFavorites.AHascode, c.getString(Hascode));
+                rows[i++] = values;
+            }
+
+            db.beginTransaction();
+            int total = 0;
+            try {
+                int numValues = rows.length;
+                for (i = 0; i < numValues; i++) {
+                    if (dbInsertAndCheck(db, TABLE_ALLAPPSFAVORITES, null, rows[i]) < 0) {
+                        return 0;
+                    } else {
+                        total++;
+                    }
+                }
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+            return total;
+        }
+
+        private boolean convertTopAppsDatabase(SQLiteDatabase db) {
+            if (LOGD) Log.d(TAG, "converting database from an older format, but not onUpgrade");
+            boolean converted = false;
+
+            final Uri uri = Uri.parse("content://" + Settings.AUTHORITY +
+                    "/old_favorites?notify=true");
+            final ContentResolver resolver = mContext.getContentResolver();
+            Cursor cursor = null;
+
+            try {
+                cursor = resolver.query(uri, null, null, null, null);
+            } catch (Exception e) {
+                // Ignore
+            }
+
+            // We already have a favorites database in the old provider
+            if (cursor != null && cursor.getCount() > 0) {
+                try {
+                    converted = copyTopAppsFromCursor(db, cursor) > 0;
+                } finally {
+                    cursor.close();
+                }
+
+                if (converted) {
+                    resolver.delete(uri, null, null);
+                }
+            }
+            
+
+            return converted;
+        }
+
+        private int copyTopAppsFromCursor(SQLiteDatabase db, Cursor c) {
+            final int idIndex = c.getColumnIndexOrThrow(LauncherSettings.TopAppsFavorites._ID);
+            final int Index = c.getColumnIndexOrThrow(LauncherSettings.TopAppsFavorites.TIndex);
+            final int PackageName = c.getColumnIndexOrThrow(LauncherSettings.TopAppsFavorites.TPackageName);
+            final int ClassName = c.getColumnIndexOrThrow(LauncherSettings.TopAppsFavorites.TClassName);
+            final int Hascode = c.getColumnIndexOrThrow(LauncherSettings.TopAppsFavorites.THascode);
+
+            ContentValues[] rows = new ContentValues[c.getCount()];
+            int i = 0;
+            while (c.moveToNext()) {
+                ContentValues values = new ContentValues(c.getColumnCount());
+                values.put(LauncherSettings.TopAppsFavorites._ID, c.getLong(idIndex));
+                values.put(LauncherSettings.TopAppsFavorites.TIndex, c.getInt(Index));
+                values.put(LauncherSettings.TopAppsFavorites.TPackageName, c.getString(PackageName));
+                values.put(LauncherSettings.TopAppsFavorites.TClassName, c.getString(ClassName));
+                values.put(LauncherSettings.TopAppsFavorites.THascode, c.getString(Hascode));
+                rows[i++] = values;
+            }
+
+            db.beginTransaction();
+            int total = 0;
+            try {
+                int numValues = rows.length;
+                for (i = 0; i < numValues; i++) {
+                    if (dbInsertAndCheck(db, TABLE_TOPAPPSFAVORITES, null, rows[i]) < 0) {
+                        return 0;
+                    } else {
+                        total++;
+                    }
+                }
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+            return total;
+        }
+
+
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -828,6 +1021,123 @@ public class LauncherProvider extends ContentProvider {
 
             return i;
         }
+
+        private int loadAllAppsFavorites(SQLiteDatabase db, int workspaceResourceId) {
+            Intent intent = new Intent(Intent.ACTION_MAIN, null);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            ContentValues values = new ContentValues();
+
+            PackageManager packageManager = mContext.getPackageManager();
+            int i = 0;
+            try {
+                XmlResourceParser parser = mContext.getResources().getXml(workspaceResourceId);
+                AttributeSet attrs = Xml.asAttributeSet(parser);
+                XmlUtils.beginDocument(parser, TAG_ALLAPPSFAVORITES);
+
+                final int depth = parser.getDepth();
+
+                int type;
+                while (((type = parser.next()) != XmlPullParser.END_TAG ||
+                        parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
+
+                    if (type != XmlPullParser.START_TAG) {
+                        continue;
+                    }
+
+                    boolean added = false;
+                    final String name = parser.getName();
+
+                    TypedArray a = mContext.obtainStyledAttributes(attrs, R.styleable.AllAppsFavorite);
+
+
+                    String index = a.getString(R.styleable.AllAppsFavorite_Aindex);
+                    String packagename = a.getString(R.styleable.AllAppsFavorite_ApackageName);
+                    String classname= a.getString(R.styleable.AllAppsFavorite_AclassName);
+                    String hascode = a.getString(R.styleable.AllAppsFavorite_Ahascode);
+
+
+					
+
+
+                    values.clear();
+                    values.put(LauncherSettings.AllAppsFavorites.AIndex, index);
+                    values.put(LauncherSettings.AllAppsFavorites.APackageName, packagename);
+                    values.put(LauncherSettings.AllAppsFavorites.AClassName, classname);
+                    values.put(LauncherSettings.AllAppsFavorites.AHascode, hascode);
+  					
+                    if (added) i++;
+                    a.recycle();
+                }
+            } catch (XmlPullParserException e) {
+                Log.w(TAG, "Got exception parsing favorites.", e);
+            } catch (IOException e) {
+                Log.w(TAG, "Got exception parsing favorites.", e);
+            } catch (RuntimeException e) {
+                Log.w(TAG, "Got exception parsing favorites.", e);
+            }
+
+            return i;
+        }
+
+        private int loadTopAppsFavorites(SQLiteDatabase db, int workspaceResourceId) {
+            Intent intent = new Intent(Intent.ACTION_MAIN, null);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            ContentValues values = new ContentValues();
+
+            PackageManager packageManager = mContext.getPackageManager();
+            int i = 0;
+            try {
+                XmlResourceParser parser = mContext.getResources().getXml(workspaceResourceId);
+                AttributeSet attrs = Xml.asAttributeSet(parser);
+                XmlUtils.beginDocument(parser, TAG_TOPAPPSFAVORITES);
+
+                final int depth = parser.getDepth();
+
+                int type;
+                while (((type = parser.next()) != XmlPullParser.END_TAG ||
+                        parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
+
+                    if (type != XmlPullParser.START_TAG) {
+                        continue;
+                    }
+
+                    boolean added = false;
+                    final String name = parser.getName();
+
+                    TypedArray a = mContext.obtainStyledAttributes(attrs, R.styleable.TopAppsFavorite);
+
+
+                    String index = a.getString(R.styleable.TopAppsFavorite_Tindex);
+                    String packagename = a.getString(R.styleable.TopAppsFavorite_TpackageName);
+                    String classname= a.getString(R.styleable.TopAppsFavorite_TclassName);
+                    String hascode = a.getString(R.styleable.TopAppsFavorite_Thascode);
+
+
+					
+
+
+                    values.clear();
+                    values.put(LauncherSettings.AllAppsFavorites.AIndex, index);
+                    values.put(LauncherSettings.AllAppsFavorites.APackageName, packagename);
+                    values.put(LauncherSettings.AllAppsFavorites.AClassName, classname);
+                    values.put(LauncherSettings.AllAppsFavorites.AHascode, hascode);
+  					
+                    if (added) i++;
+                    a.recycle();
+                }
+            } catch (XmlPullParserException e) {
+                Log.w(TAG, "Got exception parsing favorites.", e);
+            } catch (IOException e) {
+                Log.w(TAG, "Got exception parsing favorites.", e);
+            } catch (RuntimeException e) {
+                Log.w(TAG, "Got exception parsing favorites.", e);
+            }
+
+            return i;
+        }
+
+
+
 
         private long addAppShortcut(SQLiteDatabase db, ContentValues values, TypedArray a,
                 PackageManager packageManager, Intent intent) {

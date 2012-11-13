@@ -66,7 +66,7 @@
     <string name="menu_search" msgid="4826514464423239041">"Buscar"</string>
     <string name="menu_notifications" msgid="6424587053194766192">"Notificaciones"</string>
     <string name="menu_settings" msgid="3946232973327980394">"Ajustes del sistema"</string>
-    <string name="menu_preferences">"Ajustes Trebuchet"</string>
+    <string name="menu_preferences">"Ajustes DIMHome"</string>
     <string name="menu_help" msgid="4901160661634590633">"Ayuda"</string>
     <string name="menu_apps_sort_title">"Nombre"</string>
     <string name="menu_apps_sort_install_date">"Fecha Instalación"</string>

@@ -233,4 +233,93 @@ class LauncherSettings {
          */
         static final String DISPLAY_MODE = "displayMode";
     }
+
+/**
+ * AllAppsFavorites.
+ */
+ 
+
+static final class AllAppsFavorites implements BaseLauncherColumns {
+	/**
+	 * The content:// style URL for this table
+	 */
+	static final Uri CONTENT_URI = Uri.parse("content://" +
+			LauncherProvider.AUTHORITY + "/" + LauncherProvider.TABLE_ALLAPPSFAVORITES +
+			"?" + LauncherProvider.PARAMETER_NOTIFY + "=true");
+
+	/**
+	 * The content:// style URL for this table. When this Uri is used, no notification is
+	 * sent if the content changes.
+	 */
+	static final Uri CONTENT_URI_NO_NOTIFICATION = Uri.parse("content://" +
+			LauncherProvider.AUTHORITY + "/" + LauncherProvider.TABLE_ALLAPPSFAVORITES +
+			"?" + LauncherProvider.PARAMETER_NOTIFY + "=false");
+
+	/**
+	 * The content:// style URL for a given row, identified by its id.
+	 *
+	 * @param id The row id.
+	 * @param notify True to send a notification is the content changes.
+	 *
+	 * @return The unique content URL for the specified row.
+	 */
+	static Uri getContentUri(long id, boolean notify) {
+		return Uri.parse("content://" + LauncherProvider.AUTHORITY +
+				"/" + LauncherProvider.TABLE_ALLAPPSFAVORITES + "/" + id + "?" +
+				LauncherProvider.PARAMETER_NOTIFY + "=" + notify);
+	}
+
+	static final String AIndex = "adindex";
+	static final String APackageName = "apname";
+	static final String AClassName = "acname";
+	static final String AHascode = "ahascode";
+
+
+}
+
+/**
+ * TopAppsFavorites.
+ */
+
+
+static final class TopAppsFavorites implements BaseLauncherColumns {
+	/**
+	 * The content:// style URL for this table
+	 */
+	static final Uri CONTENT_URI = Uri.parse("content://" +
+			LauncherProvider.AUTHORITY + "/" + LauncherProvider.TABLE_TOPAPPSFAVORITES +
+			"?" + LauncherProvider.PARAMETER_NOTIFY + "=true");
+
+	/**
+	 * The content:// style URL for this table. When this Uri is used, no notification is
+	 * sent if the content changes.
+	 */
+	static final Uri CONTENT_URI_NO_NOTIFICATION = Uri.parse("content://" +
+			LauncherProvider.AUTHORITY + "/" + LauncherProvider.TABLE_TOPAPPSFAVORITES +
+			"?" + LauncherProvider.PARAMETER_NOTIFY + "=false");
+
+	/**
+	 * The content:// style URL for a given row, identified by its id.
+	 *
+	 * @param id The row id.
+	 * @param notify True to send a notification is the content changes.
+	 *
+	 * @return The unique content URL for the specified row.
+	 */
+	static Uri getContentUri(long id, boolean notify) {
+		return Uri.parse("content://" + LauncherProvider.AUTHORITY +
+				"/" + LauncherProvider.TABLE_TOPAPPSFAVORITES + "/" + id + "?" +
+				LauncherProvider.PARAMETER_NOTIFY + "=" + notify);
+	}
+
+	static final String TIndex = "tindex";
+	static final String TPackageName = "tpname";
+	static final String TClassName = "tcname";
+	static final String THascode ="thascode";
+
+
+}
+
+
+	
 }

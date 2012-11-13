@@ -82,6 +82,7 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -115,7 +116,7 @@ import java.util.HashMap;
 public final class Launcher extends Activity
         implements View.OnClickListener, OnLongClickListener, LauncherModel.Callbacks,
                    View.OnTouchListener {
-    static final String TAG = "Launcher";
+    static final String TAG = "DIMHome";
     static final boolean LOGD = false;
 
     static final boolean PROFILE_STARTUP = false;
@@ -286,6 +287,11 @@ public final class Launcher extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //hide status bar 
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+        		WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        
         LauncherApplication app = ((LauncherApplication)getApplication());
         mModel = app.setLauncher(this);
         mIconCache = app.getIconCache();
@@ -965,10 +971,10 @@ public final class Launcher extends Activity
 
     Rect getDefaultPaddingForWidget(Context context, ComponentName component, Rect rect) {
         // Public api for widget padding was added in 4.0.3
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+/*        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             return AppWidgetHostView.getDefaultPaddingForWidget(context, component, rect);
         }
-
+*/
         Rect p = new Rect();
 
         Resources r = getResources();
@@ -1381,10 +1387,10 @@ public final class Launcher extends Activity
         }
         Rect sourceBounds = mSearchDropTargetBar.getSearchBarBounds();
 
-        final SearchManager searchManager =
+/*        final SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchManager.startSearch(initialQuery, selectInitialQuery, getComponentName(),
-            appSearchData, globalSearch, sourceBounds);
+            appSearchData, globalSearch, sourceBounds);*/
     }
 
     @Override

@@ -163,7 +163,7 @@
   <!-- General -->
   <string name="preferences_interface_general_title">Geral</string>
   <string name="preferences_interface_general_orientation_title">Auto Rotacionar Tela</string>
-  <string name="menu_preferences">Configurações Trebuchet</string>
+  <string name="menu_preferences">Configurações DIMHome</string>
   <string name="menu_apps_sort_title">Nome</string>
   <string name="menu_apps_sort_install_date">Dia de Instalação</string>
   <string name="all_apps_sort_cling_title">Ordenar seus aplicativos</string>
