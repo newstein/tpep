@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -132,6 +133,38 @@ public class LauncherProvider extends ContentProvider {
         db.delete(args.table, args.where, args.args);
     }
 
+    private static long dbInsertAllAppsAndCheck(SQLiteDatabase db, String table,
+            String nullColumnHack, ContentValues values) {
+        if (!values.containsKey(LauncherSettings.AllAppsFavorites._ID)) {
+            throw new RuntimeException("Error: attempting to add item without specifying an id");
+        }
+        return db.insert(table, nullColumnHack, values);
+    }
+
+    private static void deleteAllAppsId(SQLiteDatabase db, long id) {
+        Uri uri = LauncherSettings.AllAppsFavorites.getContentUri(id, false);
+        SqlArguments args = new SqlArguments(uri, null, null);
+        db.delete(args.table, args.where, args.args);
+    }
+    private static long dbInsertTopAppsAndCheck(SQLiteDatabase db, String table,
+            String nullColumnHack, ContentValues values) {
+        if (!values.containsKey(LauncherSettings.TopAppsFavorites._ID)) {
+            throw new RuntimeException("Error: attempting to add item without specifying an id");
+        }
+        return db.insert(table, nullColumnHack, values);
+    }
+
+    private static void deleteTopAppsId(SQLiteDatabase db, long id) {
+        Uri uri = LauncherSettings.TopAppsFavorites.getContentUri(id, false);
+        SqlArguments args = new SqlArguments(uri, null, null);
+        db.delete(args.table, args.where, args.args);
+    }    
+    
+    
+    
+    
+    
+    
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
         SqlArguments args = new SqlArguments(uri);
@@ -275,6 +308,8 @@ public class LauncherProvider extends ContentProvider {
 
             db.execSQL("CREATE TABLE allappsfavorites (" +
                     "_id INTEGER PRIMARY KEY," +
+				    "title TEXT," +
+				    "intent TEXT," +
                     "aindex INTEGER," +
                     "apname TEXT," +
                     "acname TEXT," +
@@ -284,6 +319,8 @@ public class LauncherProvider extends ContentProvider {
 
             db.execSQL("CREATE TABLE topappsfavorites (" +
                     "_id INTEGER PRIMARY KEY," +
+				    "title TEXT," +
+				    "intent TEXT," +                    
                     "tindex INTEGER," +
                     "tpname TEXT," +
                     "tcname TEXT," +
@@ -301,8 +338,13 @@ public class LauncherProvider extends ContentProvider {
             if (!convertDatabase(db)) {
                 // Populate favorites table with initial favorites
                 loadFavorites(db, R.xml.default_workspace);
+                Log.v(TAG, "loadAllAppsFavorites:=" + "====================================================");
+				loadAllAppsFavorites(db, R.xml.default_allapps);
+				Log.v(TAG, "loadTopAppsFavorites:=" + "====================================================");
+				loadTopAppsFavorites(db, R.xml.default_topapps);
             }
-///			
+///
+/*
             if (!convertAllAppsDatabase(db)) {
 
                 loadAllAppsFavorites(db, R.xml.default_allapps);
@@ -314,7 +356,7 @@ public class LauncherProvider extends ContentProvider {
 				loadTopAppsFavorites(db, R.xml.default_topapps);
 			
             }
-
+*/
 ///
 			
         }
@@ -1028,6 +1070,43 @@ public class LauncherProvider extends ContentProvider {
             ContentValues values = new ContentValues();
 
             PackageManager packageManager = mContext.getPackageManager();
+
+            
+            List<ResolveInfo> list = packageManager.queryIntentActivities(intent, 0);
+            int len = list.size();
+            ComponentName cn;
+            
+            for (int i = 0; i < len; i++) {
+                ResolveInfo info = list.get(i);
+                //String A=info.activityInfo.applicationInfo.className;
+ 
+
+/*                ComponentName cn;
+                try {
+                    cn = new ComponentName(packageName, className);
+                    info = packageManager.getActivityInfo(cn, 0);
+                } catch (PackageManager.NameNotFoundException nnfe) {
+                    String[] packages = packageManager.currentToCanonicalPackageNames(
+                        new String[] { packageName });
+                    cn = new ComponentName(packages[0], className);
+                    info = packageManager.getActivityInfo(cn, 0);
+                */
+                
+//                final ComponentName cn = new ComponentName(info.activityInfo.applicationInfo.packageName
+//                        , info.activityInfo.name);
+//                Log.v(TAG, "Hascode:=" + cn.hashCode());
+                cn = new ComponentName(info.activityInfo.applicationInfo.packageName
+                                        , info.activityInfo.name);
+                Log.v(TAG, "Hascode:=" + cn.hashCode());
+                Log.v(TAG, "CName:=" + i);
+                Log.v(TAG, "PName:=" + info.activityInfo.applicationInfo.packageName);
+                Log.v(TAG, "className:=" + info.activityInfo.applicationInfo.className);
+                Log.v(TAG, "CName:=" + info.activityInfo.name);
+                
+                Log.v(TAG, "XXXX:=" + "====================================================");
+            }
+            
+            
             int i = 0;
             try {
                 XmlResourceParser parser = mContext.getResources().getXml(workspaceResourceId);
@@ -1049,22 +1128,25 @@ public class LauncherProvider extends ContentProvider {
 
                     TypedArray a = mContext.obtainStyledAttributes(attrs, R.styleable.AllAppsFavorite);
 
-
                     String index = a.getString(R.styleable.AllAppsFavorite_Aindex);
                     String packagename = a.getString(R.styleable.AllAppsFavorite_ApackageName);
                     String classname= a.getString(R.styleable.AllAppsFavorite_AclassName);
                     String hascode = a.getString(R.styleable.AllAppsFavorite_Ahascode);
 
 
-					
-
-
                     values.clear();
-                    values.put(LauncherSettings.AllAppsFavorites.AIndex, index);
+                    values.put(LauncherSettings.AllAppsFavorites.AIndex, i);
                     values.put(LauncherSettings.AllAppsFavorites.APackageName, packagename);
                     values.put(LauncherSettings.AllAppsFavorites.AClassName, classname);
                     values.put(LauncherSettings.AllAppsFavorites.AHascode, hascode);
-  					
+
+					if (TAG_ALLAPPSFAVORITE.equals(name)) {
+						 long id = addAppAllApps(db, values, a, packageManager, intent);
+						 added = id >= 0;
+					 }
+
+
+					
                     if (added) i++;
                     a.recycle();
                 }
@@ -1112,16 +1194,19 @@ public class LauncherProvider extends ContentProvider {
                     String classname= a.getString(R.styleable.TopAppsFavorite_TclassName);
                     String hascode = a.getString(R.styleable.TopAppsFavorite_Thascode);
 
+                    values.clear();
+                    values.put(LauncherSettings.TopAppsFavorites.TIndex, i);
+                    values.put(LauncherSettings.TopAppsFavorites.TPackageName, packagename);
+                    values.put(LauncherSettings.TopAppsFavorites.TClassName, classname);
+                    values.put(LauncherSettings.TopAppsFavorites.THascode, hascode);
+
+					if (TAG_TOPAPPSFAVORITE.equals(name)) {
+						 long id = addAppTopApps(db, values, a, packageManager, intent);
+						 added = id >= 0;
+					 }
+
 
 					
-
-
-                    values.clear();
-                    values.put(LauncherSettings.AllAppsFavorites.AIndex, index);
-                    values.put(LauncherSettings.AllAppsFavorites.APackageName, packagename);
-                    values.put(LauncherSettings.AllAppsFavorites.AClassName, classname);
-                    values.put(LauncherSettings.AllAppsFavorites.AHascode, hascode);
-  					
                     if (added) i++;
                     a.recycle();
                 }
@@ -1175,6 +1260,102 @@ public class LauncherProvider extends ContentProvider {
             }
             return id;
         }
+
+        private long addAppAllApps(SQLiteDatabase db, ContentValues values, TypedArray a,
+                PackageManager packageManager, Intent intent) {
+            long id = -1;
+            ActivityInfo info;
+            String packageName = a.getString(R.styleable.AllAppsFavorite_ApackageName);
+            String className = a.getString(R.styleable.AllAppsFavorite_AclassName);
+            
+            ComponentName cn;
+            
+            try {
+//                ComponentName cn;
+                try {
+                    cn = new ComponentName(packageName, className);
+                    info = packageManager.getActivityInfo(cn, 0);
+                } catch (PackageManager.NameNotFoundException nnfe) {
+                    String[] packages = packageManager.currentToCanonicalPackageNames(
+                        new String[] { packageName });
+                    cn = new ComponentName(packages[0], className);
+                    info = packageManager.getActivityInfo(cn, 0);
+                }
+
+//                Log.v(TAG, "ClassName", info.applicationInfo.className.toString());
+//                Log.v(TAG, "PackageName", info.applicationInfo.className.toString());
+
+                id = generateNewId();
+                intent.setComponent(cn);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                        Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+				
+                values.put(LauncherSettings.AllAppsFavorites._ID, generateNewId());
+                values.put(LauncherSettings.AllAppsFavorites.ATitle, info.loadLabel(packageManager).toString());
+                values.put(LauncherSettings.AllAppsFavorites.AIntent, intent.toUri(0));
+                values.put(LauncherSettings.AllAppsFavorites.AIndex, generateNewId());
+                values.put(LauncherSettings.AllAppsFavorites.APackageName, packageName);
+                values.put(LauncherSettings.AllAppsFavorites.AClassName, className);
+				values.put(LauncherSettings.AllAppsFavorites.AHascode, cn.hashCode());
+			
+                if (dbInsertAllAppsAndCheck(db, TABLE_ALLAPPSFAVORITES, null, values) < 0) {
+                    return -1;
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "Unable to add favorite: " + packageName +
+                        "/" + className, e);
+            }
+            return id;
+        }
+
+        private long addAppTopApps(SQLiteDatabase db, ContentValues values, TypedArray a,
+                PackageManager packageManager, Intent intent) {
+            long id = -1;
+            ActivityInfo info;
+            String packageName = a.getString(R.styleable.TopAppsFavorite_TpackageName);
+            String className = a.getString(R.styleable.TopAppsFavorite_TclassName);
+            try {
+                ComponentName cn;
+                try {
+                    cn = new ComponentName(packageName, className);
+                    info = packageManager.getActivityInfo(cn, 0);
+                } catch (PackageManager.NameNotFoundException nnfe) {
+                    String[] packages = packageManager.currentToCanonicalPackageNames(
+                        new String[] { packageName });
+                    cn = new ComponentName(packages[0], className);
+                    info = packageManager.getActivityInfo(cn, 0);
+                }
+
+
+                id = generateNewId();
+                intent.setComponent(cn);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                        Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+				
+                values.put(LauncherSettings.TopAppsFavorites._ID, generateNewId());  
+                values.put(LauncherSettings.TopAppsFavorites.TTitle, info.loadLabel(packageManager).toString());
+                values.put(LauncherSettings.TopAppsFavorites.TIntent, intent.toUri(0));               
+                values.put(LauncherSettings.TopAppsFavorites.TIndex, generateNewId());
+                values.put(LauncherSettings.TopAppsFavorites.TPackageName, packageName);
+                values.put(LauncherSettings.TopAppsFavorites.TClassName, className);
+				values.put(LauncherSettings.TopAppsFavorites.THascode, cn.hashCode());
+
+
+				
+                if (dbInsertTopAppsAndCheck(db, TABLE_TOPAPPSFAVORITES, null, values) < 0) {
+                    return -1;
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "Unable to add favorite: " + packageName +
+                        "/" + className, e);
+            }
+            return id;
+        }
+
+
+
+
+		
 
         private long addFolder(SQLiteDatabase db, ContentValues values) {
             values.put(Favorites.ITEM_TYPE, Favorites.ITEM_TYPE_FOLDER);

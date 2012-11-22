@@ -20,6 +20,15 @@
     <!-- Left screen [1] -->
 
     <!-- Middle screen [2] -->
+     <appwidget
+        launcher:packageName="com.android.settings"
+        launcher:className="com.android.settings.Settings"
+        launcher:screen="2"
+        launcher:x="1"
+        launcher:y="0"
+        launcher:spanX="2"
+        launcher:spanY="2" />   
+     <!--   
     <appwidget
         launcher:packageName="com.android.deskclock"
         launcher:className="com.android.alarmclock.AnalogAppWidgetProvider"
@@ -40,19 +49,20 @@
         launcher:screen="2"
         launcher:x="3"
         launcher:y="3" />
-
+-->
     <!-- Right screen [3] -->
 
     <!-- Far-right screen [4] -->
 
     <!-- Hotseat (We use the screen as the position of the item in the hotseat) -->
     <favorite
-        launcher:packageName="com.android.contacts"
-        launcher:className="com.android.contacts.activities.DialtactsActivity"
+        launcher:packageName="nl.sogeti.android.gpstracker"
+        launcher:className="nl.sogeti.android.gpstracker.viewer.map.CommonLoggerMap"
         launcher:container="-101"
         launcher:screen="0"
         launcher:x="0"
         launcher:y="0" />
+   <!--     
     <favorite
         launcher:packageName="com.android.contacts"
         launcher:className="com.android.contacts.activities.PeopleActivity"
@@ -74,4 +84,5 @@
         launcher:screen="4"
         launcher:x="4"
         launcher:y="0" />
+-->
 </favorites>

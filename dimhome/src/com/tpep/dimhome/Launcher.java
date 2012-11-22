@@ -810,13 +810,21 @@ public final class Launcher extends Activity
 
         final View qsbDivider = findViewById(R.id.qsb_divider);
         final View dockDivider = findViewById(R.id.dock_divider);
+
+		//sean_121116 customized apps
+      //  qsbDivider.setVisibility(View.INVISIBLE);
+        
+
+		
         // Hide the search divider if we are hiding search bar
         if (!mShowSearchBar && qsbDivider != null) {
-            qsbDivider.setVisibility(View.GONE);
+           // qsbDivider.setVisibility(View.GONE);
+            qsbDivider.setVisibility(View.INVISIBLE);
         }
 
         if (!mShowDockDivider && dockDivider != null) {
-            dockDivider.setVisibility(View.GONE);
+           // dockDivider.setVisibility(View.GONE);
+            dockDivider.setVisibility(View.INVISIBLE);
         }
 
         // Setup AppsCustomize
@@ -845,7 +853,8 @@ public final class Launcher extends Activity
         dragController.setMoveTarget(mWorkspace);
         dragController.addDropTarget(mWorkspace);
         if (mSearchDropTargetBar != null) {
-            mSearchDropTargetBar.setup(this, dragController);
+			//sean_121116 customized apps
+            //mSearchDropTargetBar.setup(this, dragController);
         }
     }
 
@@ -1386,7 +1395,8 @@ public final class Launcher extends Activity
             appSearchData.putString(Search.SOURCE, "launcher-search");
         }
         Rect sourceBounds = mSearchDropTargetBar.getSearchBarBounds();
-
+		
+		//sean_121116 customized apps
 /*        final SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchManager.startSearch(initialQuery, selectInitialQuery, getComponentName(),
@@ -2562,7 +2572,8 @@ public final class Launcher extends Activity
             hideAppsCustomizeHelper(animated, false);
 
             // Show the search bar and hotseat
-            mSearchDropTargetBar.showSearchBar(animated);
+            //sean_121116 customized apps
+            //mSearchDropTargetBar.showSearchBar(animated);
             // We only need to animate in the dock divider if we're going from spring loaded mode
             showDockDivider(animated && mState == State.APPS_CUSTOMIZE_SPRING_LOADED);
 
@@ -2592,7 +2603,8 @@ public final class Launcher extends Activity
         mAppsCustomizeTabHost.requestFocus();
 
         // Hide the search bar and hotseat
-        mSearchDropTargetBar.hideSearchBar(animated);
+        //sean_121116 customized apps
+        //mSearchDropTargetBar.hideSearchBar(animated);
 
         // Change the state *after* we've called all the transition code
         mState = State.APPS_CUSTOMIZE;
@@ -2626,7 +2638,8 @@ public final class Launcher extends Activity
                     // exitSpringLoadedDragMode made it visible. This is a bit hacky; we should
                     // clean up our state transition functions
                     mAppsCustomizeTabHost.setVisibility(View.GONE);
-                    mSearchDropTargetBar.showSearchBar(true);
+					//sean_121116 customized apps
+                    //mSearchDropTargetBar.showSearchBar(true);
                     showWorkspace(true);
                 } else {
                     exitSpringLoadedDragMode();
@@ -2684,6 +2697,7 @@ public final class Launcher extends Activity
                 } else if (mShowDockDivider) {
                     mDividerAnimator.play(ObjectAnimator.ofFloat(mDockDivider, "alpha", 1f));
                 }
+				//sean_121116 customized apps
                 mDividerAnimator.setDuration(mSearchDropTargetBar.getTransitionInDuration());
                 mDividerAnimator.start();
             }
@@ -3246,7 +3260,8 @@ public final class Launcher extends Activity
     public void bindSearchablesChanged() {
         boolean searchVisible = updateGlobalSearchIcon();
         boolean voiceVisible = updateVoiceSearchIcon(searchVisible);
-        mSearchDropTargetBar.onSearchPackagesChanged(searchVisible, voiceVisible);
+		//sean_121116 customized apps
+        //mSearchDropTargetBar.onSearchPackagesChanged(searchVisible, voiceVisible);
     }
 
     /**

@@ -25,7 +25,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src) $(call all-renderscript-fil
 
 
 LOCAL_PACKAGE_NAME := DimHome
-LOCAL_CERTIFICATE := shared
+LOCAL_CERTIFICATE := platform
 
 LOCAL_OVERRIDES_PACKAGES := Home Launcher2
 

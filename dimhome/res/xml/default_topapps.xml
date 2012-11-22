@@ -19,23 +19,23 @@
 
     <topappsfavorite
         launcher:Tindex="0"
-        launcher:TpackageName="com.android.camera"
-        launcher:TclassName="com.android.camera.Camera"
-        launcher:Thascode="2"/>
+        launcher:TpackageName="com.android.settings"
+        launcher:TclassName="com.android.settings.Settings"
+        launcher:Thascode="-672177327"/>
     <topappsfavorite
         launcher:Tindex="1"
-        launcher:TpackageName="com.android.camera"
-        launcher:TclassName="com.android.camera.Camera"
-        launcher:Thascode="2"/>
+        launcher:TpackageName="nl.sogeti.android.gpstracker"
+        launcher:TclassName="nl.sogeti.android.gpstracker.viewer.LoggerMap"
+        launcher:Thascode="1537762398"/>
     <topappsfavorite
         launcher:Tindex="2"
-        launcher:TpackageName="com.android.camera"
-        launcher:TclassName="com.android.camera.Camera"
+        launcher:TpackageName="com.lge.voicerecorder"
+        launcher:TclassName="com.lge.voicerecorder.VoiceRecorder"
         launcher:Thascode="2"/>
     <topappsfavorite
         launcher:Tindex="3"
-        launcher:TpackageName="com.android.camera"
-        launcher:TclassName="com.android.camera.Camera"
-        launcher:Thascode="2"/>
+        launcher:TpackageName="net.daum.android.daum"
+        launcher:TclassName="net.daum.android.daum.DaumActivity"
+        launcher:Thascode="-1874757934"/>
     
 </topappsfavorites>

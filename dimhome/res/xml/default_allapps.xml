@@ -19,23 +19,14 @@
 
     <allappsfavorite
         launcher:Aindex="0"
-        launcher:ApackageName="com.android.camera"
-        launcher:AclassName="com.android.camera.Camera"
-        launcher:Ahascode="2"/>
+        launcher:ApackageName="nl.sogeti.android.gpstracker"
+        launcher:AclassName="nl.sogeti.android.gpstracker.viewer.map.CommonLoggerMap"
+        launcher:Ahascode="-850343263"/>
+
     <allappsfavorite
         launcher:Aindex="1"
-        launcher:ApackageName="com.android.camera"
-        launcher:AclassName="com.android.camera.Camera"
-        launcher:Ahascode="2"/>
-    <allappsfavorite
-        launcher:Aindex="2"
-        launcher:ApackageName="com.android.camera"
-        launcher:AclassName="com.android.camera.Camera"
-        launcher:Ahascode="2"/>
-    <allappsfavorite
-        launcher:Aindex="3"
-        launcher:ApackageName="com.android.camera"
-        launcher:AclassName="com.android.camera.Camera"
-        launcher:Ahascode="2"/>
-    
+        launcher:ApackageName="com.android.settings"
+        launcher:AclassName="com.android.settings.Settings"
+        launcher:Ahascode="-672177327"/>
+   
 </allappsfavorites>

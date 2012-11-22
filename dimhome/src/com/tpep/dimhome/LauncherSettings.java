@@ -268,8 +268,9 @@ static final class AllAppsFavorites implements BaseLauncherColumns {
 				"/" + LauncherProvider.TABLE_ALLAPPSFAVORITES + "/" + id + "?" +
 				LauncherProvider.PARAMETER_NOTIFY + "=" + notify);
 	}
-
-	static final String AIndex = "adindex";
+    static final String ATitle = "title";
+    static final String AIntent = "intent";    
+	static final String AIndex = "aindex";
 	static final String APackageName = "apname";
 	static final String AClassName = "acname";
 	static final String AHascode = "ahascode";
@@ -312,6 +313,8 @@ static final class TopAppsFavorites implements BaseLauncherColumns {
 				LauncherProvider.PARAMETER_NOTIFY + "=" + notify);
 	}
 
+    static final String TTitle = "title";
+    static final String TIntent = "intent";    
 	static final String TIndex = "tindex";
 	static final String TPackageName = "tpname";
 	static final String TClassName = "tcname";

@@ -34,7 +34,10 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -45,10 +48,14 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Xml;
 
+import com.android.internal.util.XmlUtils;
 import com.tpep.dimhome.InstallWidgetReceiver.WidgetMimeTypeHandlerData;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.URISyntaxException;
 import java.text.Collator;
@@ -57,6 +64,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Maintains in-memory state of the Launcher. It is expected that there should be only one
@@ -91,6 +101,7 @@ public class LauncherModel extends BroadcastReceiver {
 
     // < only access in worker thread >
     private AllAppsList mAllAppsList;
+    private AllAppsList mCustomAllAppsList;    
 
     // sItemsIdMap maps *all* the ItemInfos (shortcuts, folders, and widgets) created by
     // LauncherModel to their ids
@@ -110,10 +121,14 @@ public class LauncherModel extends BroadcastReceiver {
 
     // sDbIconCache is the set of ItemInfos that need to have their icons updated in the database
     static final HashMap<Object, byte[]> sDbIconCache = new HashMap<Object, byte[]>();
+    public static final String TAG_CUSTOMALLAPPSFAVORITES = "allappsfavorites";
+    public static final String TAG_CUSTOMALLAPPSFAVORITE = "allappsfavorite";
 
     // </ only access in worker thread >
 
     private IconCache mIconCache;
+    private IconCache mIconCacheCustom;
+    
     private Bitmap mDefaultIcon;
 
     private static int mCellCountX;
@@ -121,6 +136,9 @@ public class LauncherModel extends BroadcastReceiver {
 
     protected int mPreviousConfigMcc;
 
+
+    
+    
     public interface Callbacks {
         public boolean setLoadOnResume();
         public int getCurrentWorkspaceScreen();
@@ -142,6 +160,8 @@ public class LauncherModel extends BroadcastReceiver {
         mAppsCanBeOnExternalStorage = !Environment.isExternalStorageEmulated();
         mApp = app;
         mAllAppsList = new AllAppsList(iconCache);
+        mCustomAllAppsList = new AllAppsList(iconCache);
+        
         mIconCache = iconCache;
 
         mDefaultIcon = Utilities.createIconBitmap(
@@ -1378,6 +1398,7 @@ public class LauncherModel extends BroadcastReceiver {
 
             final PackageManager packageManager = mContext.getPackageManager();
             List<ResolveInfo> apps = null;
+            List<ResolveInfo> customapps = null;
 
             int N = Integer.MAX_VALUE;
 
@@ -1387,6 +1408,8 @@ public class LauncherModel extends BroadcastReceiver {
                 if (i == 0) {
                     mAllAppsList.clear();
                     final long qiaTime = DEBUG_LOADERS ? SystemClock.uptimeMillis() : 0;
+                    
+                   
                     apps = packageManager.queryIntentActivities(mainIntent, 0);
                     if (DEBUG_LOADERS) {
                         Log.d(TAG, "queryIntentActivities took "
@@ -1403,7 +1426,26 @@ public class LauncherModel extends BroadcastReceiver {
                         // There are no apps?!?
                         return;
                     }
-
+                    //sean_121116 customized apps
+                    {
+                        Log.v(TAG, "START:=" + "====================================================");
+                        customapps=loadCustomAllApps(apps,R.xml.default_allapps);
+                        apps.clear();
+                        apps=customapps;
+                        Log.v(TAG, "apps.size():=" + apps.size());
+                        N = apps.size();
+                        Log.v(TAG, "END:=" + "====================================================");
+    /*                    for (int k = 0; k < apps.size() ; k++) {
+                            // This builds the icon bitmaps.
+                            mCustomAllAppsList.add(new ApplicationInfo(packageManager, apps.get(k),
+                                    mIconCache, mLabelCache));
+                            mAllAppsList.clear();
+                            mAllAppsList=mCustomAllAppsList;
+                            Log.v(TAG, "mAllAppsList.size():=" + mAllAppsList.size());*/                       
+                        }       
+                    
+                    
+                    
                     final long sortTime = DEBUG_LOADERS ? SystemClock.uptimeMillis() : 0;
                     Collections.sort(apps,
                             new LauncherModel.ShortcutNameComparator(packageManager, mLabelCache));
@@ -1411,10 +1453,15 @@ public class LauncherModel extends BroadcastReceiver {
                         Log.d(TAG, "sort took "
                                 + (SystemClock.uptimeMillis()-sortTime) + "ms");
                     }
+                           
                 }
 
                 final long t2 = DEBUG_LOADERS ? SystemClock.uptimeMillis() : 0;
 
+         
+                
+                
+                           
                 startIndex = i;
                 for (int j = 0; i < N && j < N; j++) {
                     // This builds the icon bitmaps.
@@ -1422,7 +1469,10 @@ public class LauncherModel extends BroadcastReceiver {
                             mIconCache, mLabelCache));
                     i++;
                 }
-
+ 
+                
+                
+                
                 final boolean first = i <= N;
                 final Callbacks callbacks = tryGetCallbacks(oldCallbacks);
                 final ArrayList<ApplicationInfo> added = mAllAppsList.added;
@@ -1458,7 +1508,114 @@ public class LauncherModel extends BroadcastReceiver {
                         + (SystemClock.uptimeMillis()-t) + "ms");
             }
         }
+        private List<ResolveInfo> loadCustomAllApps(List<ResolveInfo> inapps, int workspaceResourceId) {
+            
+            List<ResolveInfo> outapps=new ArrayList<ResolveInfo>();
+            Intent intent = new Intent(Intent.ACTION_MAIN, null);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+ //           ContentValues values = new ContentValues();
 
+            PackageManager packageManager = mContext.getPackageManager();
+
+            
+//            List<ResolveInfo> list = packageManager.queryIntentActivities(intent, 0);
+            List<ResolveInfo> list = inapps;
+            int len = list.size();
+            ComponentName cn;
+            int n=0;
+            
+            for (int m = 0; m < len; m++) {
+                ResolveInfo info = list.get(m);
+                
+ 
+                cn = new ComponentName(info.activityInfo.applicationInfo.packageName
+                                        , info.activityInfo.name);
+                String Comp_Hascode=null;
+                Comp_Hascode=Integer.toString(cn.hashCode());
+                String Comp_ClassName=null;
+                Comp_ClassName=info.activityInfo.name;
+                
+                Log.v(TAG, "For M:=" + "====================================================");
+                Log.v(TAG, "m:=" + m); 
+                Log.v(TAG, "Comp_Hascode:=" + Comp_Hascode);
+                Log.v(TAG, "Comp_PackageName:=" + info.activityInfo.applicationInfo.packageName);
+                Log.v(TAG, "Comp_ClassName:=" + info.activityInfo.name);
+                Log.v(TAG, "Comp_ClassName:=" + info.activityInfo.applicationInfo.className);
+                int i = 0;
+                try {
+                    XmlResourceParser parser = mContext.getResources().getXml(workspaceResourceId);
+                    AttributeSet attrs = Xml.asAttributeSet(parser);
+                    XmlUtils.beginDocument(parser, LauncherModel.TAG_CUSTOMALLAPPSFAVORITES);
+
+                    final int depth = parser.getDepth();
+
+                    int type;
+                    while (((type = parser.next()) != XmlPullParser.END_TAG ||
+                            parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
+
+                        if (type != XmlPullParser.START_TAG) {
+                            continue;
+                        }
+
+                        boolean added = false;
+                        final String name = parser.getName();
+
+                        TypedArray a = mContext.obtainStyledAttributes(attrs, R.styleable.AllAppsFavorite);
+
+                        String index = a.getString(R.styleable.AllAppsFavorite_Aindex);
+                        String packagename = a.getString(R.styleable.AllAppsFavorite_ApackageName);
+                        String classname= a.getString(R.styleable.AllAppsFavorite_AclassName);
+                        String hascode = a.getString(R.styleable.AllAppsFavorite_Ahascode);
+                        Log.v(TAG, "XML Parser:=" + "||||||||||||||||||||||||||||||||||||||");
+                        Log.v(TAG, "i:=" + i); 
+                        Log.v(TAG, "allapps_packagename:=" + packagename);
+                        Log.v(TAG, "allapps_classname:=" + classname);
+                        Log.v(TAG, "allapps_hascode:=" + hascode);  
+                        if (LauncherModel.TAG_CUSTOMALLAPPSFAVORITE.equals(name)) {
+
+ //                           if(Comp_Hascode.equals(hascode))
+                            if(Comp_ClassName.equals(classname))
+                            {
+                                outapps.add(n,info);
+                                Log.v(TAG, "n:=" + n);
+                                n++;
+                                Log.v(TAG, "n:=" + n);
+                                Log.v(TAG, "i:=" + i);    
+                                Log.v(TAG, "INSERT:=" + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");                                
+                                                   
+                            }
+                            
+                         }
+                        
+                        if (added) i++;
+                        a.recycle();
+                    }
+                } catch (XmlPullParserException e) {
+                    Log.w(TAG, "Got exception parsing favorites.", e);
+                } catch (IOException e) {
+                    Log.w(TAG, "Got exception parsing favorites.", e);
+                } catch (RuntimeException e) {
+                    Log.w(TAG, "Got exception parsing favorites.", e);
+                }
+
+                  
+                
+            }
+           
+             ///
+            // Sort the list.
+ //           Collections.sort(list);
+ //           Collections.sort(list,0);
+            Log.v(TAG, "outapps.size():=" + outapps.size());    
+            //outapps=list;
+
+           
+            return outapps;
+            
+        }
+        
+        
+        
         public void dumpState() {
             Log.d(TAG, "mLoaderTask.mContext=" + mContext);
             Log.d(TAG, "mLoaderTask.mWaitThread=" + mWaitThread);
@@ -1942,6 +2099,18 @@ public class LauncherModel extends BroadcastReceiver {
             return 0;
         }
     };
+  //sean_121116 customized apps
+ /*   public static final Comparator<List<ResolveInfo>> ALPHA_COMPARATOR = new Comparator<List<ResolveInfo>>() {
+        
+        @Override
+        public int compare(List<ResolveInfo> arg0, List<ResolveInfo> arg1) {
+            // TODO Auto-generated method stub
+            
+            return 0;
+        }*/
+    
+    
+    
     public static final Comparator<AppWidgetProviderInfo> WIDGET_NAME_COMPARATOR
             = new Comparator<AppWidgetProviderInfo>() {
         public final int compare(AppWidgetProviderInfo a, AppWidgetProviderInfo b) {
@@ -2016,6 +2185,10 @@ public class LauncherModel extends BroadcastReceiver {
         }
     };
 
+
+    
+    
+    
     public void dumpState() {
         Log.d(TAG, "mCallbacks=" + mCallbacks);
         ApplicationInfo.dumpApplicationInfoList(TAG, "mAllAppsList.data", mAllAppsList.data);
