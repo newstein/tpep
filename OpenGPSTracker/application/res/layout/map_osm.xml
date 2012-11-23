@@ -12,7 +12,7 @@
         cloudmadeStyle="1"
         renderer="CLOUDMADESTANDARDTILES"
         android:clickable="true" />
-
+ 
     <include layout="@layout/map_widgets" />
 
 </RelativeLayout>

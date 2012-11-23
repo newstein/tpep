@@ -35,23 +35,34 @@ import nl.sogeti.android.gpstracker.viewer.map.overlay.FixedMyLocationOverlay;
 import nl.sogeti.android.gpstracker.viewer.map.overlay.OverlayProvider;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.media.audiofx.BassBoost.Settings;
 import android.os.Bundle;
+import android.view.ActionProvider;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
+
+import android.content.Context;
+import android.content.Intent;;
 
 /**
  * Main activity showing a track and allowing logging control
@@ -59,7 +70,7 @@ import com.google.android.maps.MapView;
  * @version $Id$
  * @author rene (c) Jan 18, 2009, Sogeti B.V.
  */
-public class GoogleLoggerMap extends MapActivity implements LoggerMap
+public class GoogleLoggerMap extends MapActivity implements LoggerMap,View.OnClickListener
 {
    LoggerMapHelper mHelper;
    private MapView mMapView;
@@ -68,6 +79,18 @@ public class GoogleLoggerMap extends MapActivity implements LoggerMap
    private TextView mLastGPSAltitudeView;
    private TextView mDistanceView;
    private FixedMyLocationOverlay mMylocation;
+   
+   ///sean_20121122
+   private ImageView hotseat1;
+   private ImageView hotseat2;
+   private ImageView hotseat3;
+
+   private static final Intent sSettingsIntent = new Intent(android.provider.Settings.ACTION_SETTINGS);   
+ //  private final Context mContext;  
+   
+   private static final int MENU_HOTSEAT1 = 15;
+   private static final int MENU_HOTSEAT2 = 16;
+   private static final int MENU_HOTSEAT3 = 17;  
    
    /**
     * Called when the activity is first created.
@@ -81,6 +104,8 @@ public class GoogleLoggerMap extends MapActivity implements LoggerMap
       requestWindowFeature(Window.FEATURE_NO_TITLE);
       getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
           WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//      mContext=load;
+      
       
       setContentView(R.layout.map_google);
       
@@ -94,6 +119,21 @@ public class GoogleLoggerMap extends MapActivity implements LoggerMap
       mLastGPSSpeedView = (TextView) findViewById(R.id.currentSpeed);
       mLastGPSAltitudeView = (TextView) findViewById(R.id.currentAltitude);
       mDistanceView = (TextView) findViewById(R.id.currentDistance);
+      
+      ///sean_20121122
+      hotseat1 = (ImageView) findViewById(R.id.hotseat1);
+      hotseat2 = (ImageView) findViewById(R.id.hotseat2);
+      hotseat3 = (ImageView) findViewById(R.id.hotseat3);
+      
+      hotseat1.setVisibility(ImageView.VISIBLE);
+      hotseat2.setVisibility(ImageView.VISIBLE);
+      hotseat3.setVisibility(ImageView.VISIBLE);
+      
+      hotseat1.setOnClickListener(this);
+      hotseat2.setOnClickListener(this);     
+      hotseat3.setOnClickListener(this);      
+      
+      
       
       mHelper.onCreate(load);
    }
@@ -146,13 +186,19 @@ public class GoogleLoggerMap extends MapActivity implements LoggerMap
    public boolean onCreateOptionsMenu(Menu menu)
    {
       boolean result = super.onCreateOptionsMenu(menu);
+      
+      //sean_121123
       mHelper.onCreateOptionsMenu(menu);
+//      getMenuInflater().inflate(R.menu.action_bar_settings_action_provider, menu); 
+ //     return true;
       return result;
    }
    
    @Override
    public boolean onPrepareOptionsMenu(Menu menu)
    {
+      
+    //sean_121123
       mHelper.onPrepareOptionsMenu(menu);
       return super.onPrepareOptionsMenu(menu);
    }
@@ -160,12 +206,16 @@ public class GoogleLoggerMap extends MapActivity implements LoggerMap
    @Override
    public boolean onOptionsItemSelected(MenuItem item)
    {
+      //sean_121123
       boolean handled = mHelper.onOptionsItemSelected(item);
       if( !handled )
       {
          handled = super.onOptionsItemSelected(item);
       }
       return handled;
+
+ 
+      
    }
    
    @Override
@@ -504,4 +554,31 @@ public class GoogleLoggerMap extends MapActivity implements LoggerMap
    {
       return (SlidingIndicatorView) findViewById(R.id.scaleindicator);
    }
+
+   @Override
+   public void onClick(View v)
+   {
+      // TODO Auto-generated method stub
+
+
+      switch (v.getId()) {
+          case R.id.hotseat1:
+             startActivity(sSettingsIntent);
+              break;
+          case R.id.hotseat2:
+             startActivity(sSettingsIntent);
+              break;
+          case R.id.hotseat3:
+             startActivity(sSettingsIntent);
+              break;
+ 
+      }
+
+    
+   }
+
+   
+    
+   
+
 }

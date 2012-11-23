@@ -583,6 +583,7 @@ public final class Launcher extends Activity
     protected void onResume() {
         super.onResume();
         mPaused = false;
+ 
         // Restart launcher when preferences are changed
         if (preferencesChanged()) {
             android.os.Process.killProcess(android.os.Process.myPid());

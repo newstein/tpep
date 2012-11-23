@@ -14,7 +14,6 @@
     <!-- Release         : 0bmdf4-ggC50QWBY1OgGRutQ9bIboIy11OczZbw -->
     <!-- Debug           : 0VzWlbyPyrYpSxsAebpxnLBDHFy8dzNk9lpYmHw -->
     <!-- SEAN           : 0IS6jgPXfVfBmmLLTLRq-L_dGtXnoGq-xTHkAJA -->    
-    <include
-        layout="@layout/map_widgets" />
-
+    <include layout="@layout/map_widgets" />
+    
 </RelativeLayout>

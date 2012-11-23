@@ -25,6 +25,8 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
@@ -56,6 +58,12 @@ public class MapQuestLoggerMap extends MapActivity implements LoggerMap
    protected void onCreate(Bundle load)
    {
       super.onCreate(load);
+      
+      //hide status bar 
+      requestWindowFeature(Window.FEATURE_NO_TITLE);
+      getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+          WindowManager.LayoutParams.FLAG_FULLSCREEN);
+      
       setContentView(R.layout.map_mapquest);
       
       mMapView = (MapView) findViewById(R.id.myMapView);

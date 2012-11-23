@@ -28,5 +28,10 @@
         launcher:ApackageName="com.android.settings"
         launcher:AclassName="com.android.settings.Settings"
         launcher:Ahascode="-672177327"/>
-   
+
+        <allappsfavorite
+        launcher:Aindex="1"
+        launcher:ApackageName="com.lge.message"
+        launcher:AclassName="com.lge.message.ui.ConversationList"
+        launcher:Ahascode="-1982179079"/>
 </allappsfavorites>

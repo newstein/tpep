@@ -58,6 +58,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.ActionProvider;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -117,6 +118,10 @@ public class LoggerMapHelper
    private static final int DIALOG_CONTRIB = 35;
    private static final String TAG = "OGT.LoggerMap";
 
+
+   
+   
+   
    private double mAverageSpeed = 33.33d / 3d;
    private double mAverageHeight = 33.33d / 3d;
    private long mTrackId = -1;
@@ -206,7 +211,8 @@ public class LoggerMapHelper
 
       mSharedPreferences.registerOnSharedPreferenceChangeListener(mSharedPreferenceChangeListener);
       mUnits.setUnitsChangeListener(mUnitsChangeListener);
-      updateTitleBar();
+      //sean_121122
+      //updateTitleBar();
       updateBlankingBehavior();
 
       if (mTrackId >= 0)
@@ -739,7 +745,8 @@ public class LoggerMapHelper
 
    public void onCreateOptionsMenu(Menu menu)
    {
-      menu.add(ContextMenu.NONE, MENU_TRACKING, ContextMenu.NONE, R.string.menu_tracking).setIcon(R.drawable.ic_menu_movie).setAlphabeticShortcut('T');
+      //sean_121123
+     menu.add(ContextMenu.NONE, MENU_TRACKING, ContextMenu.NONE, R.string.menu_tracking).setIcon(R.drawable.ic_menu_movie).setAlphabeticShortcut('T');
       menu.add(ContextMenu.NONE, MENU_LAYERS, ContextMenu.NONE, R.string.menu_showLayers).setIcon(R.drawable.ic_menu_mapmode).setAlphabeticShortcut('L');
       menu.add(ContextMenu.NONE, MENU_NOTE, ContextMenu.NONE, R.string.menu_insertnote).setIcon(R.drawable.ic_menu_myplaces);
 
@@ -751,11 +758,14 @@ public class LoggerMapHelper
       menu.add(ContextMenu.NONE, MENU_SETTINGS, ContextMenu.NONE, R.string.menu_settings).setIcon(R.drawable.ic_menu_preferences).setAlphabeticShortcut('C');
       menu.add(ContextMenu.NONE, MENU_ABOUT, ContextMenu.NONE, R.string.menu_about).setIcon(R.drawable.ic_menu_info_details).setAlphabeticShortcut('A');
       menu.add(ContextMenu.NONE, MENU_CONTRIB, ContextMenu.NONE, R.string.menu_contrib).setIcon(R.drawable.ic_menu_allfriends);
+
+ 
    }
 
    public void onPrepareOptionsMenu(Menu menu)
    {
-      MenuItem noteMenu = menu.findItem(MENU_NOTE);
+      //sean_121123
+     MenuItem noteMenu = menu.findItem(MENU_NOTE);
       noteMenu.setEnabled(mLoggerServiceManager.isMediaPrepared());
 
       MenuItem shareMenu = menu.findItem(MENU_SHARE);
@@ -827,6 +837,8 @@ public class LoggerMapHelper
             break;
          case MENU_CONTRIB:
             mLoggerMap.getActivity().showDialog(DIALOG_CONTRIB);
+
+            
          default:
             handled = false;
             break;
@@ -1104,17 +1116,22 @@ public class LoggerMapHelper
             {
                drawSpeedTexts();
                speedtexts = mLoggerMap.getSpeedTextViews();
-               speedbar.setVisibility(View.VISIBLE);
-               scaleIndicator.setVisibility(View.VISIBLE);
+               //sean_121122
+               speedbar.setVisibility(View.INVISIBLE);
+               scaleIndicator.setVisibility(View.INVISIBLE);              
+               //speedbar.setVisibility(View.VISIBLE);
+               //scaleIndicator.setVisibility(View.VISIBLE);
                for (int i = 0; i < speedtexts.length; i++)
                {
-                  speedtexts[i].setVisibility(View.VISIBLE);
+                  //sean_121122
+                  speedtexts[i].setVisibility(View.INVISIBLE);
+                  //speedtexts[i].setVisibility(View.VISIBLE);
                }
             }
             break;
          case SegmentRendering.DRAW_DOTS:
          case SegmentRendering.DRAW_GREEN:
-         case SegmentRendering.DRAW_RED:
+         case SegmentRendering.DRAW_RED:       
             speedbar.setVisibility(View.INVISIBLE);
             scaleIndicator.setVisibility(View.INVISIBLE);
             for (int i = 0; i < speedtexts.length; i++)
@@ -1132,14 +1149,20 @@ public class LoggerMapHelper
             {
                drawHeightTexts();
                speedtexts = mLoggerMap.getSpeedTextViews();
-               speedbar.setVisibility(View.VISIBLE);
-               scaleIndicator.setVisibility(View.VISIBLE);
+               //sean_121122
+               speedbar.setVisibility(View.INVISIBLE);
+               scaleIndicator.setVisibility(View.INVISIBLE);               
+               //speedbar.setVisibility(View.VISIBLE);
+               //scaleIndicator.setVisibility(View.VISIBLE);
                for (int i = 0; i < speedtexts.length; i++)
                {
-                  speedtexts[i].setVisibility(View.VISIBLE);
+                  //sean_121122
+                  speedtexts[i].setVisibility(View.INVISIBLE);
+                  //speedtexts[i].setVisibility(View.VISIBLE);
                }
             }
             break;
+            
          default:
             break;
       }
@@ -1668,4 +1691,7 @@ public class LoggerMapHelper
       return mLoggerServiceManager.getLoggingState() == Constants.LOGGING;
    }
 
+   
+   
+   
 }

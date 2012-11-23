@@ -38,6 +38,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
@@ -68,6 +70,12 @@ public class OsmLoggerMap extends Activity implements LoggerMap
    protected void onCreate(Bundle load)
    {
       super.onCreate(load);
+      
+      //hide status bar 
+//      requestWindowFeature(Window.FEATURE_NO_TITLE);
+//      getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//          WindowManager.LayoutParams.FLAG_FULLSCREEN);
+      
       setContentView(R.layout.map_osm);
       
       mMapView = (MapView) findViewById(R.id.myMapView);

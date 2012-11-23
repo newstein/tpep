@@ -12,14 +12,23 @@
  */
 package nl.sogeti.android.gpstracker.viewer.map;
 
+import nl.sogeti.android.gpstracker.R;
 import nl.sogeti.android.gpstracker.util.Constants;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.ActionProvider;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 /**
  * ????
@@ -75,4 +84,19 @@ public class CommonLoggerMap extends Activity
       startActivity(realIntent);
       finish();
    }
+
+   
+   
+ 
+   @Override
+   public void onBackPressed()
+   {
+      // TODO Auto-generated method stub
+      super.onBackPressed();
+   }
+   
+ 
+     
+   
+  
 }
