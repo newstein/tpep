@@ -26,6 +26,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.app.StatusBarManager;
 import android.app.UiModeManager;
@@ -97,6 +98,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.common.Search;
+import com.tpep.dimhome.aidlservice.MyParcelableMessage;
 import com.tpep.dimhome.R;
 import com.tpep.dimhome.DropTarget.DragObject;
 import com.tpep.dimhome.preference.*;
@@ -109,6 +111,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+
+
+
 
 /**
  * Default launcher application.
@@ -184,6 +190,10 @@ public final class Launcher extends Activity
 
     private final BroadcastReceiver mCloseSystemDialogsReceiver
             = new CloseSystemDialogsIntentReceiver();
+    
+    private RemoteParcelableMessageServiceServiceConnection remoteServiceConnection;
+    
+    
     private final ContentObserver mWidgetObserver = new AppWidgetResetObserver();
 
     private LayoutInflater mInflater;
@@ -324,6 +334,10 @@ public final class Launcher extends Activity
 
         mSavedState = savedInstanceState;
         restoreState(mSavedState);
+        
+
+
+        
 
         // Update customization drawer _after_ restoring the states
         if (mAppsCustomizeContent != null) {
@@ -350,6 +364,12 @@ public final class Launcher extends Activity
         IntentFilter filter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         registerReceiver(mCloseSystemDialogsReceiver, filter);
 
+
+        //AIDL Service Creation & Bind
+        remoteServiceConnection = new RemoteParcelableMessageServiceServiceConnection(this);
+        remoteServiceConnection.safelyConnectTheService();
+        
+        
         boolean searchVisible = false;
         boolean voiceVisible = false;
         // If we have a saved version of these external icons, we load them up immediately
@@ -1359,6 +1379,11 @@ public final class Launcher extends Activity
         getContentResolver().unregisterContentObserver(mWidgetObserver);
         unregisterReceiver(mCloseSystemDialogsReceiver);
 
+        //sean_121130
+//        unregisterReceiver(mAIDLServiceReceiver);
+        //destroy AIDL Service 
+        remoteServiceConnection.safelyDisconnectTheService();
+        
         ((ViewGroup) mWorkspace.getParent()).removeAllViews();
         mWorkspace.removeAllViews();
         mWorkspace = null;
@@ -3060,6 +3085,9 @@ public final class Launcher extends Activity
         }
     }
 
+    
+       
+    
     /**
      * Receives notifications whenever the appwidgets are reset.
      */
@@ -3561,6 +3589,16 @@ public final class Launcher extends Activity
             writer.println("  " + sDumpLogs.get(i));
         }
     }
+
+    void theMessageWasReceivedAsynchronously(MyParcelableMessage message) {
+  //      message.applyMessageToTextView(messageTextView);
+        Log.d(TAG, "theMessageWasReceivedAsynchronously");
+  
+    }
+    
+    
+    
+    
 }
 
 interface LauncherTransitionable {

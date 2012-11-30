@@ -1100,6 +1100,8 @@ public class LauncherProvider extends ContentProvider {
                 Log.v(TAG, "Hascode:=" + cn.hashCode());
                 Log.v(TAG, "CName:=" + i);
                 Log.v(TAG, "PName:=" + info.activityInfo.applicationInfo.packageName);
+                Intent intent2=packageManager.getLaunchIntentForPackage(info.activityInfo.applicationInfo.packageName);
+                Log.v(TAG, "Intent2:=" + intent2.getPackage());
                 Log.v(TAG, "className:=" + info.activityInfo.applicationInfo.className);
                 Log.v(TAG, "CName:=" + info.activityInfo.name);
                 
