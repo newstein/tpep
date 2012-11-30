@@ -185,11 +185,19 @@
             </intent-filter>
         </service>
         <service android:name=".breadcrumbs.BreadcrumbsService" />
-		<service android:name="AIDLParcelableMessageService">
+ 		<service android:name="AIDLParcelableMessageService">
 			<intent-filter>
 				<action android:name="appsolut.intent.action.bindParcelableMessageService"></action>
 			</intent-filter>
-		</service>
+		</service>  
+        <service
+            android:name=".authenticator.AuthenticationService"
+            android:exported="true">
+            <intent-filter>
+                <action
+                    android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+        </service>		    
         <provider
             android:name=".db.GPStrackingProvider"
             android:authorities="nl.sogeti.android.gpstracker"

@@ -28,6 +28,8 @@
  */
 package nl.sogeti.android.gpstracker.viewer.map;
 
+import java.util.List;
+
 import nl.sogeti.android.gpstracker.R;
 import nl.sogeti.android.gpstracker.util.Constants;
 import nl.sogeti.android.gpstracker.util.SlidingIndicatorView;
@@ -35,14 +37,19 @@ import nl.sogeti.android.gpstracker.viewer.map.overlay.FixedMyLocationOverlay;
 import nl.sogeti.android.gpstracker.viewer.map.overlay.OverlayProvider;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.hardware.SensorManager;
 import android.media.audiofx.BassBoost.Settings;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
+import android.util.Log;
 import android.view.ActionProvider;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -51,6 +58,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.View.OnClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -62,8 +70,12 @@ import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
 
 import android.content.Context;
-import android.content.Intent;;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 
+
+import com.tpep.dimhome.aidlservice.MyParcelableMessage;
 /**
  * Main activity showing a track and allowing logging control
  * 
@@ -72,6 +84,7 @@ import android.content.Intent;;
  */
 public class GoogleLoggerMap extends MapActivity implements LoggerMap,View.OnClickListener
 {
+   private static final String TAG = "GoogleLoggerMap";
    LoggerMapHelper mHelper;
    private MapView mMapView;
    private TextView[] mSpeedtexts;
@@ -83,14 +96,25 @@ public class GoogleLoggerMap extends MapActivity implements LoggerMap,View.OnCli
    ///sean_20121122
    private ImageView hotseat1;
    private ImageView hotseat2;
-   private ImageView hotseat3;
+   private TextView hotseat3;
 
-   private static final Intent sSettingsIntent = new Intent(android.provider.Settings.ACTION_SETTINGS);   
- //  private final Context mContext;  
+   private static final Intent sSettingsIntent = new Intent(android.provider.Settings.ACTION_SETTINGS);  
    
-   private static final int MENU_HOTSEAT1 = 15;
-   private static final int MENU_HOTSEAT2 = 16;
-   private static final int MENU_HOTSEAT3 = 17;  
+//   private static final Intent sMessageIntent = new Intent(android.provider.Settings.ACTION_SETTINGS);     
+   
+   
+ //  private final Context mContext;  
+   private SensorManager mSensorManager;
+   private PowerManager mPowerManager;   
+   private WakeLock mWakeLock;
+ 
+   private PackageManager pm;
+   private Intent mIntent;
+   
+   
+   private RemoteParcelableMessageServiceServiceConnection remoteServiceConnection;
+   private TextView messageTextView;
+   
    
    /**
     * Called when the activity is first created.
@@ -123,15 +147,34 @@ public class GoogleLoggerMap extends MapActivity implements LoggerMap,View.OnCli
       ///sean_20121122
       hotseat1 = (ImageView) findViewById(R.id.hotseat1);
       hotseat2 = (ImageView) findViewById(R.id.hotseat2);
-      hotseat3 = (ImageView) findViewById(R.id.hotseat3);
+      hotseat3 = (TextView) findViewById(R.id.hotseat3);
       
       hotseat1.setVisibility(ImageView.VISIBLE);
       hotseat2.setVisibility(ImageView.VISIBLE);
-      hotseat3.setVisibility(ImageView.VISIBLE);
+      hotseat3.setVisibility(TextView.VISIBLE);
       
       hotseat1.setOnClickListener(this);
       hotseat2.setOnClickListener(this);     
       hotseat3.setOnClickListener(this);      
+ 
+      //mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+      // Get an instance of the PowerManager
+      mPowerManager = (PowerManager) getSystemService(POWER_SERVICE);
+      mWakeLock = mPowerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, getClass().getName());
+
+      pm = getPackageManager();
+      
+      remoteServiceConnection = new RemoteParcelableMessageServiceServiceConnection(this);
+ //     remoteServiceConnection.safelyConnectTheService();
+  
+      hotseat3.setOnClickListener(new OnClickListener() {
+         
+         @Override
+         public void onClick(View v) {
+            remoteServiceConnection.safelyQueryMessage();
+         }
+      });
       
       
       
@@ -143,12 +186,20 @@ public class GoogleLoggerMap extends MapActivity implements LoggerMap,View.OnCli
    {
       super.onResume();
       mHelper.onResume();
+      /*
+       * when the activity is resumed, we acquire a wake-lock so that the
+       * screen stays on, since the user will likely not be fiddling with the
+       * screen or buttons.
+       */
+      mWakeLock.acquire();
    }
    
    @Override
    protected void onPause()
    {
       mHelper.onPause();
+      // and release our wake-lock
+      mWakeLock.release();
       super.onPause();
    }
    
@@ -188,7 +239,7 @@ public class GoogleLoggerMap extends MapActivity implements LoggerMap,View.OnCli
       boolean result = super.onCreateOptionsMenu(menu);
       
       //sean_121123
-      mHelper.onCreateOptionsMenu(menu);
+//     mHelper.onCreateOptionsMenu(menu);
 //      getMenuInflater().inflate(R.menu.action_bar_settings_action_provider, menu); 
  //     return true;
       return result;
@@ -199,7 +250,7 @@ public class GoogleLoggerMap extends MapActivity implements LoggerMap,View.OnCli
    {
       
     //sean_121123
-      mHelper.onPrepareOptionsMenu(menu);
+ //     mHelper.onPrepareOptionsMenu(menu);
       return super.onPrepareOptionsMenu(menu);
    }
    
@@ -207,12 +258,14 @@ public class GoogleLoggerMap extends MapActivity implements LoggerMap,View.OnCli
    public boolean onOptionsItemSelected(MenuItem item)
    {
       //sean_121123
-      boolean handled = mHelper.onOptionsItemSelected(item);
+      
+      return false;
+/*      boolean handled = mHelper.onOptionsItemSelected(item);
       if( !handled )
       {
          handled = super.onOptionsItemSelected(item);
       }
-      return handled;
+      return handled;*/
 
  
       
@@ -559,11 +612,37 @@ public class GoogleLoggerMap extends MapActivity implements LoggerMap,View.OnCli
    public void onClick(View v)
    {
       // TODO Auto-generated method stub
+      Intent intent = new Intent(Intent.ACTION_MAIN, null);
+      intent.addCategory(Intent.CATEGORY_LAUNCHER);
+      List<ResolveInfo> list = pm.queryIntentActivities(intent, 0);
+      int len = list.size();
+      for (int i = 0; i < len; i++) {
+         ResolveInfo info = list.get(i);
+         //String A=info.activityInfo.applicationInfo.className;
 
+         Log.v(TAG, "CName:=" + i);
+         Log.v(TAG, "PName:=" + info.activityInfo.applicationInfo.packageName);
+         Intent intent2=pm.getLaunchIntentForPackage(info.activityInfo.applicationInfo.packageName);
+         String packagename=info.activityInfo.applicationInfo.packageName;
+         Log.v(TAG, "packagename:=" + packagename);
+         Log.v(TAG, "Intent2:=" + intent2.getPackage());
+         Log.v(TAG, "className:=" + info.activityInfo.applicationInfo.className);
+         Log.v(TAG, "CName:=" + info.activityInfo.name);
+         if(packagename.equals("com.lge.message"))
+         {
+            mIntent=pm.getLaunchIntentForPackage(info.activityInfo.applicationInfo.packageName);
+          
+            break;
+         }
+         
+         Log.v(TAG, "XXXX:=" + "====================================================");
+     }
+       
 
       switch (v.getId()) {
           case R.id.hotseat1:
-             startActivity(sSettingsIntent);
+              startActivity(mIntent);
+ //            startActivity(sSettingsIntent);
               break;
           case R.id.hotseat2:
              startActivity(sSettingsIntent);
@@ -574,10 +653,16 @@ public class GoogleLoggerMap extends MapActivity implements LoggerMap,View.OnCli
  
       }
 
+      
+      
+      
     
    }
 
-   
+   void theMessageWasReceivedAsynchronously(MyParcelableMessage message) {
+      message.applyMessageToTextView(hotseat3);
+      Log.v(TAG, "XXXX:=" + "====================================================");
+    }
     
    
 

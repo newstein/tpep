@@ -17,7 +17,10 @@ import nl.sogeti.android.gpstracker.util.Constants;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ActionProvider;
@@ -40,6 +43,8 @@ public class CommonLoggerMap extends Activity
 {
    private static final String TAG = "OGT.CommonLoggerMap";
 
+   
+   
    @Override
    protected void onCreate(Bundle savedInstanceState)
    {
@@ -49,6 +54,9 @@ public class CommonLoggerMap extends Activity
       requestWindowFeature(Window.FEATURE_NO_TITLE);
       getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
           WindowManager.LayoutParams.FLAG_FULLSCREEN);
+      
+ 
+      
       
       Intent myIntent = getIntent();
       Intent realIntent;

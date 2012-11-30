@@ -25,9 +25,11 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.maps.GeoPoint;
@@ -41,7 +43,7 @@ import com.mapquest.android.maps.MyLocationOverlay;
  * @version $Id:$
  * @author rene (c) Mar 3, 2012, Sogeti B.V.
  */
-public class MapQuestLoggerMap extends MapActivity implements LoggerMap
+public class MapQuestLoggerMap extends MapActivity implements LoggerMap,View.OnClickListener
 {
    LoggerMapHelper mHelper;
    private MapView mMapView;
@@ -50,6 +52,15 @@ public class MapQuestLoggerMap extends MapActivity implements LoggerMap
    private TextView mLastGPSAltitudeView;
    private TextView mDistanceView;
    private MyLocationOverlay mMylocation;
+
+   ///sean_20121122
+   private ImageView hotseat1;
+   private ImageView hotseat2;
+   private TextView hotseat3;
+
+   private static final Intent sSettingsIntent = new Intent(android.provider.Settings.ACTION_SETTINGS);   
+ //  private final Context mContext;     
+   
    
    /**
     * Called when the activity is first created.
@@ -77,6 +88,20 @@ public class MapQuestLoggerMap extends MapActivity implements LoggerMap
       mLastGPSSpeedView = (TextView) findViewById(R.id.currentSpeed);
       mLastGPSAltitudeView = (TextView) findViewById(R.id.currentAltitude);
       mDistanceView = (TextView) findViewById(R.id.currentDistance);
+  
+      ///sean_20121122
+      hotseat1 = (ImageView) findViewById(R.id.hotseat1);
+      hotseat2 = (ImageView) findViewById(R.id.hotseat2);
+      hotseat3 = (TextView) findViewById(R.id.hotseat3);
+      
+      hotseat1.setVisibility(ImageView.VISIBLE);
+      hotseat2.setVisibility(ImageView.VISIBLE);
+      hotseat3.setVisibility(TextView.VISIBLE);
+      
+      hotseat1.setOnClickListener(this);
+      hotseat2.setOnClickListener(this);     
+      hotseat3.setOnClickListener(this);           
+      
       
       mHelper.onCreate(load);
    }
@@ -441,6 +466,25 @@ public class MapQuestLoggerMap extends MapActivity implements LoggerMap
    public boolean isRouteDisplayed()
    {
       return true;
+   }
+
+   @Override
+   public void onClick(View v)
+   {
+      // TODO Auto-generated method stub
+      switch (v.getId()) {
+         case R.id.hotseat1:
+            startActivity(sSettingsIntent);
+             break;
+         case R.id.hotseat2:
+            startActivity(sSettingsIntent);
+             break;
+         case R.id.hotseat3:
+            startActivity(sSettingsIntent);
+             break;
+
+     }
+      
    }
 
 }

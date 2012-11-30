@@ -38,9 +38,11 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.maps.GeoPoint;
@@ -51,7 +53,7 @@ import com.google.android.maps.GeoPoint;
  * @version $Id:$
  * @author rene (c) Feb 26, 2012, Sogeti B.V.
  */
-public class OsmLoggerMap extends Activity implements LoggerMap
+public class OsmLoggerMap extends Activity implements LoggerMap,View.OnClickListener
 {
    protected static final String TAG = "OsmLoggerMap";
    LoggerMapHelper mHelper;
@@ -62,7 +64,14 @@ public class OsmLoggerMap extends Activity implements LoggerMap
    private TextView mDistanceView;
    private MyLocationOverlay mMylocation;
    private Projection mProjecton;
-   
+ 
+   ///sean_20121122
+   private ImageView hotseat1;
+   private ImageView hotseat2;
+   private TextView hotseat3;
+
+   private static final Intent sSettingsIntent = new Intent(android.provider.Settings.ACTION_SETTINGS);   
+ //  private final Context mContext;        
    /**
     * Called when the activity is first created.
     */
@@ -89,6 +98,20 @@ public class OsmLoggerMap extends Activity implements LoggerMap
       mHelper = new LoggerMapHelper(this);
       mMapView.setBuiltInZoomControls(true);
       mProjecton = mMapView.getProjection();
+      
+      ///sean_20121122
+      hotseat1 = (ImageView) findViewById(R.id.hotseat1);
+      hotseat2 = (ImageView) findViewById(R.id.hotseat2);
+      hotseat3 = (TextView) findViewById(R.id.hotseat3);
+      
+      hotseat1.setVisibility(ImageView.VISIBLE);
+      hotseat2.setVisibility(ImageView.VISIBLE);
+      hotseat3.setVisibility(TextView.VISIBLE);
+      
+      hotseat1.setOnClickListener(this);
+      hotseat2.setOnClickListener(this);     
+      hotseat3.setOnClickListener(this);           
+      
       mHelper.onCreate(load);
       
       mMylocation = new MyLocationOverlay(this, mMapView);
@@ -519,5 +542,23 @@ public class OsmLoggerMap extends Activity implements LoggerMap
    public SlidingIndicatorView getScaleIndicatorView()
    {
       return (SlidingIndicatorView) findViewById(R.id.scaleindicator);
+   }
+
+   @Override
+   public void onClick(View v)
+   {
+      // TODO Auto-generated method stub
+      switch (v.getId()) {
+         case R.id.hotseat1:
+            startActivity(sSettingsIntent);
+             break;
+         case R.id.hotseat2:
+            startActivity(sSettingsIntent);
+             break;
+         case R.id.hotseat3:
+            startActivity(sSettingsIntent);
+             break;
+
+     }      
    }
 }
